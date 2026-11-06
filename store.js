@@ -23,6 +23,8 @@
       update: (obj) => db.ref().update(obj),
       setIfAbsent: (path, v) =>
         db.ref(path).transaction((cur) => (cur === null ? v : undefined)).then((r) => r.committed),
+      goOffline: () => db.goOffline(),
+      goOnline: () => db.goOnline(),
     };
     return;
   }
@@ -62,6 +64,8 @@
 
   window.store = {
     live: false,
+    goOffline() {},
+    goOnline() {},
     TS: { ".sv": "timestamp" },
     now: () => Date.now(),
     watch(path, cb) {

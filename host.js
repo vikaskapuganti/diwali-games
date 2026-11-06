@@ -203,7 +203,15 @@ function screenQuestion(showAnswer) {
     ${optionTiles(q, showAnswer)}
     <div class="answered">${showAnswer
       ? `Correct answer: <b>${LETTERS[q.answer]}. ${esc(q.options[q.answer])}</b>`
-      : `<b>${nAnswered()}</b> of ${nPlayers()} ${who} answered`}</div>`;
+      : `<b>${nAnswered()}</b> of ${nPlayers()} ${who} answered`}</div>
+    ${showAnswer ? "" : answerChips()}`;
+}
+
+// Everyone's name, lit up once they have answered (never shows what they picked)
+function answerChips() {
+  const list = Object.entries(players).sort((a, b) => (a[1].joinedAt || 0) - (b[1].joinedAt || 0));
+  return `<div class="anschips">${list.map(([id, p]) =>
+    `<span class="${answers[id] ? "done" : ""}">${esc(p.name)}</span>`).join("")}</div>`;
 }
 
 function boardRows(list) {

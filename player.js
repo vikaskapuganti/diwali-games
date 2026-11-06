@@ -169,8 +169,18 @@ function render() {
     scr.innerHTML = screenWait(r ? `You finished #${r.rank}` : "Quiz over", "Thanks for playing. Happy Diwali!");
   }
   scr.querySelectorAll("[data-i]").forEach((b) => (b.onclick = () => answer(+b.dataset.i)));
+  releaseConnectionSoon(s === "final");
   tick();
 }
+
+// Free Firebase allows 100 open connections, and every open tab counts.
+// A minute after the game ends, this page disconnects so it frees its place.
+let offlineTimer = null;
+function releaseConnectionSoon(isOver) {
+  if (isOver && !offlineTimer) offlineTimer = setTimeout(() => store.goOffline(), 60000);
+  if (!isOver && offlineTimer) { clearTimeout(offlineTimer); offlineTimer = null; }
+}
+
 
 function tick() {
   if (!meta || meta.state !== "question" || typeof meta.qStart !== "number") return;

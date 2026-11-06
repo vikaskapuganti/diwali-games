@@ -196,6 +196,7 @@ function render() {
     return;
   }
 
+  releaseConnectionSoon(s === "over");
   if (s === "over") {
     scr.innerHTML = `<div class="p-center"><div class="card"><p class="big">Game over</p>
       <p class="muted" style="margin:8px 0 14px">Thanks for playing. Happy Diwali!</p>
@@ -218,6 +219,14 @@ function render() {
     ${claimButtons(cells)}`;
   scr.querySelectorAll("[data-n]").forEach((b) => (b.onclick = () => tapCell(+b.dataset.n, b)));
   scr.querySelectorAll("[data-claim]").forEach((b) => (b.onclick = () => claim(b.dataset.claim)));
+}
+
+// Free Firebase allows 100 open connections, and every open tab counts.
+// A minute after the game ends, this page disconnects so it frees its place.
+let offlineTimer = null;
+function releaseConnectionSoon(isOver) {
+  if (isOver && !offlineTimer) offlineTimer = setTimeout(() => store.goOffline(), 60000);
+  if (!isOver && offlineTimer) { clearTimeout(offlineTimer); offlineTimer = null; }
 }
 
 tryResume();

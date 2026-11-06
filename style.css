@@ -264,3 +264,11 @@ body.player main { max-width: 520px; margin: 0 auto; padding: 28px 16px 24px; mi
   .tb-layout { grid-template-columns: 1fr; }
   .prizes { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* quiz: names light up as people answer */
+.anschips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 1.6vh auto 0; max-width: 95%; max-height: 16vh; overflow: hidden; }
+.anschips span {
+  font-size: clamp(11px, .95vw, 17px); padding: 3px 10px; border-radius: 99px;
+  background: rgba(255, 255, 255, .06); color: rgba(255, 255, 255, .35); transition: background .25s, color .25s;
+}
+.anschips span.done { background: linear-gradient(180deg, var(--gold), var(--orange)); color: #2a1200; font-weight: 700; animation: pop .3s ease; }
