@@ -81,7 +81,8 @@ Open `host.html` again. The badge at the top should now say **LIVE** in green.
 
 - Open the host link on the laptop, and press **Full screen**.
 - Pick **Solo** or **Team**, wait for people to join, then press **Start quiz**.
-- Each question ends automatically after 20 seconds, or as soon as everyone has answered. You can also press **Reveal answer now**.
+- There is no time limit. A clock counts up on the projector, and players can answer until you press **Reveal answer**. The answer never shows on its own.
+- Answering sooner still earns a speed bonus (it shrinks to 0 over 30 seconds).
 - Keyboard shortcuts: Right arrow or Space goes next, and Left arrow goes back.
 - **Back** never restarts a timer, and scores are never counted twice.
 - If the laptop browser refreshes, reopen `host.html` and press **Resume it**. If a phone refreshes, the player rejoins automatically with their score.

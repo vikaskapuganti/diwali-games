@@ -276,3 +276,6 @@ body.player main { max-width: 520px; margin: 0 auto; padding: 28px 16px 24px; mi
 /* share buttons on the start screen */
 .share { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 2.4vh; }
 .share .btn { font-size: clamp(14px, 1.2vw, 20px); }
+
+/* count-up clock: plain gold ring */
+.timer.up { background: var(--gold); }

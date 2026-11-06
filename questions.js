@@ -2,7 +2,8 @@
 // "answer" is the position of the correct option: 0 = A, 1 = B, 2 = C, 3 = D.
 window.QUIZ = {
   title: "Diwali Quiz",
-  timeLimitSec: 20,      // seconds per question
+  // No time limit: players can answer until the host presses Reveal answer.
+  bonusWindowSec: 30,    // speed bonus shrinks from full to 0 over these seconds
   basePoints: 10,        // points for a correct answer
   speedBonus: 5,         // extra points for answering fast (scales down to 0)
   rounds: [

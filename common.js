@@ -1,6 +1,5 @@
 // Helpers shared by the host and player pages.
-const LIMIT = QUIZ.timeLimitSec * 1000;
-const GRACE = 2000; // network allowance for late-arriving answers
+const BONUS_MS = QUIZ.bonusWindowSec * 1000;
 const LETTERS = ["A", "B", "C", "D"];
 const FLAT = [];
 QUIZ.rounds.forEach((r, ri) =>
@@ -24,7 +23,7 @@ function rankOf(players, id) {
 }
 function pointsFor(choiceAt, qStart, double) {
   const el = Math.max(0, choiceAt - qStart);
-  if (el > LIMIT + GRACE) return 0;
-  const frac = Math.max(0, 1 - el / LIMIT);
+  // a correct answer always scores; answering sooner adds a speed bonus
+  const frac = Math.max(0, 1 - el / BONUS_MS);
   return (QUIZ.basePoints + Math.round(QUIZ.speedBonus * frac)) * (double ? 2 : 1);
 }

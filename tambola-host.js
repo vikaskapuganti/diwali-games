@@ -211,6 +211,8 @@ function render() {
   }
   if (!meta) { scr.innerHTML = `<div class="center"><p class="sub">Connecting...</p></div>`; ctl.innerHTML = ""; return; }
   const s = meta.state;
+  // a finished game no longer needs the Resume option
+  if (s === "over" && localStorage.getItem("rtihTambolaHost") === code) localStorage.removeItem("rtihTambolaHost");
   scr.innerHTML = s === "lobby" ? screenLobby() : s === "playing" ? screenPlaying() : screenOver();
   const info = `<span class="info">Game ${esc(code)} · ${nPlayers()} players</span><span class="spacer"></span>`;
   let main = "";
@@ -259,5 +261,13 @@ function wireShare(message) {
     setTimeout(render, 2600);
   };
 }
+
+// On load, drop a remembered game that has finished or no longer exists
+(async () => {
+  const saved = localStorage.getItem("rtihTambolaHost");
+  if (!saved) return;
+  const m = await store.get(`tambola/${saved}/meta`);
+  if (!m || m.state === "over") { localStorage.removeItem("rtihTambolaHost"); if (!code) render(); }
+})();
 
 render();

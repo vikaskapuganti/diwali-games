@@ -73,7 +73,6 @@ function leave() {
 
 async function answer(choice) {
   if (sending || myAnswer || !meta || meta.state !== "question") return;
-  if (typeof meta.qStart === "number" && store.now() > meta.qStart + LIMIT) return;
   sending = true;
   myAnswer = { choice, pending: true };
   render();
@@ -119,17 +118,16 @@ function screenQuestion() {
   const q = FLAT[meta.qIndex];
   const r = QUIZ.rounds[q.round];
   const picked = myAnswer ? myAnswer.choice : null;
-  const over = typeof meta.qStart === "number" && store.now() > meta.qStart + LIMIT;
   return `<div class="p-head"><span>Round ${q.round + 1} · Q${q.num} of ${q.total}${r.double ? " · 2x" : ""}</span><span class="p-timer" id="ptimer"></span></div>
-    <div class="p-bar"><i id="pbar" style="width:100%"></i></div>
+    <div style="height:14px"></div>
     <p class="p-q">${esc(q.q)}</p>
     <div class="p-opts">${q.options.map((o, i) => {
       const cls = picked === null ? "" : picked === i ? "picked" : "faded";
-      return `<button class="p-opt o${LETTERS[i]} ${cls}" data-i="${i}" ${picked !== null || over ? "disabled" : ""}><span class="letter">${LETTERS[i]}</span><span>${esc(o)}</span></button>`;
+      return `<button class="p-opt o${LETTERS[i]} ${cls}" data-i="${i}" ${picked !== null ? "disabled" : ""}><span class="letter">${LETTERS[i]}</span><span>${esc(o)}</span></button>`;
     }).join("")}</div>
     <p class="muted" style="text-align:center;margin-top:16px">${
       picked !== null ? `Answer locked: <b style="color:#fff">${LETTERS[picked]}</b>. Wait for the reveal.` :
-      over ? "Time's up" : "Tap your answer. Faster answers score more."}</p>`;
+      "Tap your answer. Faster answers score more."}</p>`;
 }
 
 function screenReveal() {
@@ -184,11 +182,8 @@ function releaseConnectionSoon(isOver) {
 
 function tick() {
   if (!meta || meta.state !== "question" || typeof meta.qStart !== "number") return;
-  const rem = meta.qStart + LIMIT - store.now();
-  const t = $("#ptimer"), bar = $("#pbar");
-  if (t) t.textContent = Math.max(0, Math.ceil(rem / 1000));
-  if (bar) bar.style.width = Math.max(0, Math.min(100, (rem / LIMIT) * 100)) + "%";
-  if (rem <= 0 && !myAnswer && !$(".p-opt[disabled]")) render();
+  const t = $("#ptimer");
+  if (t) t.textContent = Math.max(0, Math.floor((store.now() - meta.qStart) / 1000)) + "s";
 }
 setInterval(tick, 200);
 

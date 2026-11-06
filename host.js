@@ -142,7 +142,7 @@ function screenSetup(saved) {
   return `<div class="center">
     ${DIYA}
     <h1 class="title-xl">${esc(QUIZ.title)}</h1>
-    <p class="sub">${QUIZ.rounds.length} rounds · ${FLAT.length} questions · ${QUIZ.timeLimitSec} seconds each</p>
+    <p class="sub">${QUIZ.rounds.length} rounds · ${FLAT.length} questions</p>
     <div class="mode-pick">
       <button class="mode-card" data-mode="solo"><b>Solo</b><span>Everyone plays on their own phone. Top 10 players on the leaderboard.</span></button>
       <button class="mode-card" data-mode="team"><b>Team</b><span>One phone per team. Teams compete on the leaderboard.</span></button>
@@ -176,7 +176,7 @@ function screenRoundIntro() {
   return `<div class="center">
     <p class="sub">Round ${meta.round + 1} of ${QUIZ.rounds.length}</p>
     <h1 class="title-xl">${esc(r.title)}</h1>
-    <p class="sub">${r.questions.length} questions · ${QUIZ.timeLimitSec} seconds each${r.double ? " · <b style='color:var(--orange)'>Double points</b>" : ""}</p>
+    <p class="sub">${r.questions.length} questions${r.double ? " · <b style='color:var(--orange)'>Double points</b>" : ""}</p>
   </div>`;
 }
 
@@ -195,10 +195,10 @@ function optionTiles(q, showAnswer) {
 function screenQuestion(showAnswer) {
   const q = FLAT[meta.qIndex];
   const r = QUIZ.rounds[q.round];
-  const who = meta.mode === "team" ? "teams" : "players";
+  const who = (meta.mode === "team" ? "team" : "player") + (nPlayers() === 1 ? "" : "s");
   return `<div class="qhead">
       <div class="where">Round ${q.round + 1}: <b>${esc(r.title)}</b>${r.double ? '<span class="pill2x">2x points</span>' : ""}<br>Question ${q.num} of ${q.total}</div>
-      ${showAnswer ? "" : `<div class="timer" id="timer"><span id="tnum">${QUIZ.timeLimitSec}</span></div>`}
+      ${showAnswer ? "" : `<div class="timer up" id="timer"><span id="tnum">0</span></div>`}
     </div>
     <div class="question">${esc(q.q)}</div>
     ${optionTiles(q, showAnswer)}
@@ -254,7 +254,7 @@ function controls() {
   let main = "";
   if (s === "lobby") main = `<button class="btn" id="next" ${nPlayers() ? "" : "disabled"}>Start quiz</button>`;
   if (s === "roundIntro") main = `${backBtn}<button class="btn" id="next">Start round ${meta.round + 1}</button>`;
-  if (s === "question") main = `<button class="btn" id="next">Reveal answer now</button>`;
+  if (s === "question") main = `<button class="btn" id="next">Reveal answer</button>`;
   if (s === "reveal") {
     const q = FLAT[meta.qIndex];
     const label = q.num < q.total ? "Next question" : q.round < QUIZ.rounds.length - 1 ? "Show leaderboard" : "Show winners";
@@ -277,6 +277,8 @@ function render() {
   }
   if (!meta) { scr.innerHTML = `<div class="center"><p class="sub">Connecting...</p></div>`; ctl.innerHTML = ""; return; }
   const s = meta.state;
+  // a finished game no longer needs the Resume option
+  if (s === "final" && localStorage.getItem("rtihQuizHost") === code) localStorage.removeItem("rtihQuizHost");
   scr.innerHTML =
     s === "lobby" ? screenLobby() :
     s === "roundIntro" ? screenRoundIntro() :
@@ -297,15 +299,11 @@ function render() {
 // ---------- timer ----------
 function tick() {
   if (!meta || meta.state !== "question" || typeof meta.qStart !== "number") return;
-  const rem = meta.qStart + LIMIT - store.now();
+  // count-up clock only; the answer is revealed when the host presses the button
   const t = $("#timer");
   if (t) {
-    const secs = Math.max(0, Math.ceil(rem / 1000));
-    $("#tnum").textContent = secs;
-    t.style.setProperty("--p", Math.max(0, Math.min(100, (rem / LIMIT) * 100)) + "%");
-    t.classList.toggle("low", secs <= 5);
+    $("#tnum").textContent = Math.max(0, Math.floor((store.now() - meta.qStart) / 1000));
   }
-  if (rem <= 0 || (nPlayers() > 0 && nAnswered() >= nPlayers())) reveal();
 }
 setInterval(tick, 200);
 
@@ -343,5 +341,13 @@ function wireShare(message) {
     setTimeout(render, 2600);
   };
 }
+
+// On load, drop a remembered game that has finished or no longer exists
+(async () => {
+  const saved = localStorage.getItem("rtihQuizHost");
+  if (!saved) return;
+  const m = await store.get(`rooms/${saved}/meta`);
+  if (!m || m.state === "final") { localStorage.removeItem("rtihQuizHost"); if (!code) render(); }
+})();
 
 render();
