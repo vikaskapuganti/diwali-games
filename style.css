@@ -272,3 +272,7 @@ body.player main { max-width: 520px; margin: 0 auto; padding: 28px 16px 24px; mi
   background: rgba(255, 255, 255, .06); color: rgba(255, 255, 255, .35); transition: background .25s, color .25s;
 }
 .anschips span.done { background: linear-gradient(180deg, var(--gold), var(--orange)); color: #2a1200; font-weight: 700; animation: pop .3s ease; }
+
+/* share buttons on the start screen */
+.share { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 2.4vh; }
+.share .btn { font-size: clamp(14px, 1.2vw, 20px); }

@@ -161,11 +161,12 @@ function screenLobby() {
         <p class="sub">${meta.mode === "team" ? "Team mode: one phone per team" : "Solo mode: everyone plays on their own phone"}</p>
         <div class="code">Scan the QR code, or open the link and enter the code<span>${esc(code)}</span></div>
         <div class="url">${esc(url)}</div>
+        ${shareButtons()}
       </div>
       <div class="qr"><img alt="QR code to join" src="${qrFor(url)}"></div>
     </div>
     <div class="joined">
-      <h3>${list.length} ${word} joined</h3>
+      <h3>${list.length} ${list.length === 1 ? word.slice(0, -1) : word} joined</h3>
       <div class="chips">${list.map((p) => `<span class="chip">${esc(p.name)}</span>`).join("")}</div>
     </div>`;
 }
@@ -288,6 +289,7 @@ function render() {
   on("next", next);
   on("back", back);
   on("new", newGame);
+  if (meta && meta.state === "lobby") wireShare(`Join the Diwali Quiz on your phone: ${joinUrl()}\nGame code: ${code}`);
   on("full", () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()));
   tick();
 }
@@ -313,5 +315,33 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); const b = $("#next"); if (b && !b.disabled) next(); }
   if (e.key === "ArrowLeft") { const b = $("#back"); if (b && !b.disabled) back(); }
 });
+
+// ---------- share the join link (WhatsApp / copy) ----------
+let copiedUntil = 0;
+function shareButtons() {
+  const copied = Date.now() < copiedUntil;
+  return `<div class="share">
+      <button class="btn" id="shareWa">Share on WhatsApp</button>
+      <button class="btn ghost" id="copyLink">${copied ? "Link copied" : "Copy link"}</button>
+    </div>`;
+}
+function wireShare(message) {
+  const wa = document.getElementById("shareWa");
+  if (wa) wa.onclick = () => window.open("https://wa.me/?text=" + encodeURIComponent(message), "_blank");
+  const cp = document.getElementById("copyLink");
+  if (cp) cp.onclick = async () => {
+    const link = joinUrl();
+    try { await navigator.clipboard.writeText(link); }
+    catch (e) {
+      const t = document.createElement("textarea");
+      t.value = link; document.body.appendChild(t); t.select();
+      try { document.execCommand("copy"); } catch (e2) {}
+      t.remove();
+    }
+    copiedUntil = Date.now() + 2500;
+    render();
+    setTimeout(render, 2600);
+  };
+}
 
 render();
